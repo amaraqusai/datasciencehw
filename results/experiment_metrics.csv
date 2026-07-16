@@ -1,0 +1,3 @@
+Model,Accuracy,Precision,Recall,F1-Score,MCC,ROC-AUC,PR-AUC
+MLP,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Random Forest,1.0,1.0,1.0,1.0,1.0,1.0,1.0
