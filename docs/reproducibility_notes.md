@@ -29,11 +29,23 @@ Log of environment setup, baselines runs, and pipeline audits.
 
 ---
 
-## Reproducibility audit
+## Our preprocessing pipeline (`src/preprocessing.py`)
 
-1. **Dataset Scale Constraint:** The original repository operates on massive CSVs (18GB) which causes extreme friction for reproducible peer review.
-2. **Mitigation Strategy:** We implemented a `generate_synthetic_cicids2017()` pipeline in `Final_Project_Notebook.ipynb` to model the precise statistical distributions and extreme class imbalances of the real dataset. This guarantees instant "click-and-run" execution for the examiner without waiting hours for downloads.
-3. **Toggle provided:** To use the real data, place it in `data/raw/` and flip the `USE_SYNTHETIC` flag to `False` in the notebook.
+| Step | Technique |
+|------|-----------|
+| Data Generation | `np.random.normal` based on CICIDS2017 distributions |
+| Missing Values | Replaced with median |
+| Infinite Values | Dropped |
+| Scaling | StandardScaler fit on train |
+
+## Our model training (`src/models.py`)
+
+| Setting | Value |
+|---------|-------|
+| Encoding | N/A (CICIDS2017 synthetic numeric features) |
+| Models | MLP (`hidden_layer_sizes=(128, 64)`), RF (`n_estimators=100`) |
+| `random_state` | 42 |
+| Outputs | `results/experiment_metrics.csv`, `results/baseline_reproduction.csv`, `results/errors_rare_attacks_analysis.csv` |
 
 ## Evaluation summary
 

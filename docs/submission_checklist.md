@@ -15,10 +15,12 @@ Use this before the deadline (Friday, July 10, 2026, 23:59).
 
 | Criterion | Where to verify |
 |-----------|-----------------|
-| ≥2 models with robust metrics | `Final_Project_Notebook.ipynb` (MLP and Random Forest) |
-| Report evaluates author claims | `docs/critical_evaluation.md` and LaTeX report |
-| Feature redundancy/scaling analysis | Notebook Section 3, Report Section 4 |
-| Per-attack-type error analysis (FP vs FN) | Notebook Section 6, Report Section 7 |
+| DBN Baseline reproduced (or approximated) | `results/baseline_reproduction.csv`, Notebook Section 2 |
+| ≥2 models with MCC and AUC | `results/experiment_metrics.csv` (MLP, Random Forest) |
+| Report evaluates ≥5 author claims | Report Section 2, `docs/critical_evaluation.md` (3 claims) |
+| Data generation / SMOTE equivalent | `src/preprocessing.py`, Notebook Section 1 |
+| Per-attack-type error analysis (FP vs FN) | Notebook Section 3, `results/errors_rare_attacks_analysis.csv` |
+| Feature redundancy/scaling analysis | `src/preprocessing.py`, Report Section 3 |
 
 ## Before you submit
 
