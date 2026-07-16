@@ -67,7 +67,7 @@ nb.cells.append(nbf.v4.new_code_cell("print('--- False Negatives (Missed Attacks
 nb.cells.append(nbf.v4.new_markdown_cell("## 8. Explainability (SHAP XAI)"))
 nb.cells.append(nbf.v4.new_code_cell("print('--- Global SHAP Importances ---')\nshow_table('global_shap.csv')\nprint('\\n--- Local SHAP Cohort Profiles ---')\nshow_table('local_shap.csv')"))
 
-with open('Final_Project.ipynb', 'w') as f:
+with open('Final_Project.ipynb', 'w', encoding='utf-8') as f:
     nbf.write(nb, f)
 
 print("Notebook assembled. Executing cells...")
@@ -81,6 +81,6 @@ except Exception as e:
     print(f"Error executing notebook: {e}")
 
 # Save executed notebook
-with open('Final_Project_Executed.ipynb', 'w') as f:
+with open('Final_Project_Executed.ipynb', 'w', encoding='utf-8') as f:
     nbf.write(nb, f)
 print("Saved to Final_Project_Executed.ipynb")
