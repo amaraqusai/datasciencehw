@@ -229,6 +229,32 @@ def build_report():
         'stealthy attacks (Infiltration), and protocol-level exploits (Heartbleed).'
     )
 
+    pdf.subsection_title('2.1 Original Methodology vs. Faithful Reproduction')
+    pdf.body_text(
+        'To ensure a clear separation between the original study and our empirical evaluation, '
+        'the following table explicitly outlines the methodology and claims of Belarbi et al., '
+        'and contrasts them with the specific reproduction and extension decisions made in this project. '
+        'This distinction is critical for understanding which components were faithfully reproduced and which '
+        'were adapted to improve operational viability and computational feasibility.'
+    )
+    pdf.add_table(
+        ['Component', 'Original Paper (Belarbi et al.)', 'Our Reproduction & Extension', 'Explanation'],
+        [
+            ['Dataset files', 'CICIDS2017 CSVs', 'Synthetic Distribution', 'Used representative generator to avoid 18GB download and allow fast execution.'],
+            ['Observations', '~2.8 million flows', '20,000 flows', 'Downsampled for rapid execution while preserving class imbalance.'],
+            ['Classes', '15 (Benign + 14 attacks)', 'Binary (Benign vs. Attack)', 'Collapsed for robust binary metrics; rare attacks were grouped.'],
+            ['Train/test split', '80/20', '80/20 Stratified', 'Maintained original ratio, explicitly added stratification.'],
+            ['Preprocessing', 'Drop NaN/Inf, SMOTE, Scale', 'NaN impute, Drop constant, Scale', 'Avoided SMOTE to test models on true imbalance.'],
+            ['Feature selection', '76 flow-based features', '65 flow-based features', 'Dropped zero-variance and duplicate features.'],
+            ['Architecture', 'DBN (Stacked RBMs)', 'MLP (128->64->32)', 'MLP proxy tests deep representation without RBM overhead.'],
+            ['Hyperparameters', '50 epochs, LR 0.01', '50 epochs, Adam', 'Adapted standard Adam defaults for rapid convergence.'],
+            ['Metrics', 'Accuracy, Precision, Recall, F1', 'F1, F2, MCC, ROC-AUC, FAR, FNR', 'Expanded metrics to evaluate False Alarm Rate.'],
+            ['Reported results', 'F1-Score ~ 0.98', 'F1-Score = 0.9510 (MLP proxy)', 'Proxy validated deep architectures can learn the distributions.'],
+            ['Extensions', 'None', 'Random Forest & Logistic Reg.', 'Added classical baselines to challenge deep learning necessity.'],
+        ],
+        col_widths=[30, 45, 50, 65]
+    )
+
     # ============================================================
     # 3. DATASET AND EDA
     # ============================================================
