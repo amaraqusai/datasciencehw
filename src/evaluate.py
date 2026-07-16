@@ -5,8 +5,8 @@ and saves all results to the results/ directory.
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
-from preprocessing import generate_synthetic_cicids2017, run_eda, clean_data, split_and_scale
-from models import train_all_models, evaluate_all_models, get_error_analysis
+from preprocessing import load_real_cicids2017, run_eda, clean_data, split_and_scale
+from model_utils import train_all_models, evaluate_all_models, get_error_analysis
 
 def main():
     print("=" * 60)

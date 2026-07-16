@@ -80,7 +80,7 @@ def train(
         logging.info(f"Epoch {epoch}/{num_epochs}:")
         for inputs, labels in tqdm(train_loader):
             inputs, labels = inputs.to(device), labels.to(device)
-            labels = labels.squeeze(1)
+            labels = labels.view(-1)
 
             # zero the parameter gradients
             for opt in optimizer:
@@ -123,7 +123,7 @@ def train(
         with torch.no_grad():
             for inputs, labels in valid_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
-                labels = labels.squeeze(1)
+                labels = labels.view(-1)
 
                 outputs = model(inputs)
 
