@@ -300,6 +300,8 @@ def build_report():
         'misleading metric - a model that predicts "Benign" for every flow achieves ~80% accuracy while missing '
         '100% of all attacks. This is why we prioritize F1, MCC, and recall-oriented metrics.'
     )
+    pdf.image('results/figures/class_distribution.png', w=190)
+
 
     pdf.subsection_title('3.7 Correlation and Redundancy Analysis')
     pdf.body_text(
@@ -309,6 +311,11 @@ def build_report():
         'duplicate). These duplicate columns were removed to prevent multicollinearity, which can inflate feature '
         'importance scores and destabilize the weight estimates of linear models like Logistic Regression.'
     )
+    pdf.add_page()
+    pdf.image('results/figures/correlation_heatmap.png', w=170)
+    pdf.image('results/figures/feature_distributions.png', w=190)
+    pdf.image('results/figures/outlier_analysis.png', w=190)
+
 
     # ============================================================
     # 4. FEATURE ENGINEERING
@@ -360,6 +367,8 @@ def build_report():
         'effectively learning a univariate classifier on Flow Bytes/s alone. StandardScaler ensures all '
         'features contribute equally to the learning process.'
     )
+    pdf.image('results/figures/scaling_comparison.png', w=190)
+
 
     # ============================================================
     # 5. MODEL ARCHITECTURE
@@ -436,26 +445,8 @@ def build_report():
     )
 
     pdf.subsection_title('6.2 Full Results Table')
-    pdf.add_table(
-        ['Metric', 'Logistic Reg.', 'Random Forest', 'MLP (Deep)'],
-        [
-            ['Accuracy', '0.9685', '0.9745', '0.9810'],
-            ['Precision', '0.9985', '0.9957', '0.9814'],
-            ['Recall', '0.8438', '0.8763', '0.9225'],
-            ['F1-Score', '0.9146', '0.9322', '0.9510'],
-            ['F2-Score', '0.8707', '0.8978', '0.9337'],
-            ['MCC', '0.9003', '0.9194', '0.9400'],
-            ['ROC-AUC', '0.9734', '0.9944', '0.9912'],
-            ['PR-AUC', '0.9570', '0.9858', '0.9818'],
-            ['True Positives', '675', '701', '738'],
-            ['True Negatives', '3199', '3197', '3186'],
-            ['False Positives', '1', '3', '14'],
-            ['False Negatives', '125', '99', '62'],
-            ['FAR', '0.0003', '0.0009', '0.0044'],
-            ['FNR', '0.1563', '0.1238', '0.0775'],
-        ],
-        col_widths=[40, 50, 50, 50]
-    )
+    pdf.image('results/figures/results_table.png', w=190)
+
 
     pdf.subsection_title('6.3 Analysis of Results')
     pdf.bold_text('F1-Score:')
@@ -480,6 +471,11 @@ def build_report():
         'classification thresholds. This is operationally valuable because SOC teams can calibrate the threshold '
         'to their specific FP/FN cost function.'
     )
+    pdf.image('results/figures/roc_pr_curves.png', w=190)
+    pdf.add_page()
+    pdf.image('results/figures/confusion_matrices.png', w=190)
+    pdf.image('results/figures/feature_importance.png', w=190)
+
 
     pdf.subsection_title('6.4 Training Time Comparison')
     pdf.add_table(
