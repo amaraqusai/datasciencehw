@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, precision_recall_curve
 
-from preprocessing import generate_synthetic_cicids2017, run_eda, clean_data, split_and_scale
+from preprocessing import load_real_cicids2017, run_eda, clean_data, split_and_scale
 from models import train_all_models, evaluate_all_models
 
 sns.set_theme(style="whitegrid", palette="muted")
@@ -21,7 +21,7 @@ plt.rcParams.update({'figure.figsize': (12, 6), 'figure.dpi': 150, 'font.size': 
 os.makedirs('../results/figures', exist_ok=True)
 
 print("[1/8] Generating dataset...")
-df = generate_synthetic_cicids2017(n_samples=20000)
+df = load_real_cicids2017(sample_frac=0.10)
 eda = run_eda(df)
 
 # ============================================================

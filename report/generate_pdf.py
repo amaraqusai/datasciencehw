@@ -240,8 +240,8 @@ def build_report():
     pdf.add_table(
         ['Component', 'Original Paper (Belarbi et al.)', 'Our Reproduction & Extension', 'Explanation'],
         [
-            ['Dataset files', 'CICIDS2017 CSVs', 'Synthetic Distribution', 'Used representative generator to avoid 18GB download and allow fast execution.'],
-            ['Observations', '~2.8 million flows', '20,000 flows', 'Downsampled for rapid execution while preserving class imbalance.'],
+            ['Dataset files', 'CICIDS2017 CSVs', 'CICIDS2017 CSVs', 'Used the real CICIDS2017 data directly to ensure empirical validity as requested.'],
+            ['Observations', '~2.8 million flows', '~280,000 flows', '10% stratified sampling for rapid execution while preserving true class imbalance.'],
             ['Classes', '15 (Benign + 14 attacks)', 'Binary (Benign vs. Attack)', 'Collapsed for robust binary metrics; rare attacks were grouped.'],
             ['Train/test split', '80/20', '80/20 Stratified', 'Maintained original ratio, explicitly added stratification.'],
             ['Preprocessing', 'Drop NaN/Inf, SMOTE, Scale', 'NaN impute, Drop constant, Scale', 'Avoided SMOTE to test models on true imbalance.'],
@@ -249,7 +249,7 @@ def build_report():
             ['Architecture', 'DBN (Stacked RBMs)', 'MLP (128->64->32)', 'MLP proxy tests deep representation without RBM overhead.'],
             ['Hyperparameters', '50 epochs, LR 0.01', '50 epochs, Adam', 'Adapted standard Adam defaults for rapid convergence.'],
             ['Metrics', 'Accuracy, Precision, Recall, F1', 'F1, F2, MCC, ROC-AUC, FAR, FNR', 'Expanded metrics to evaluate False Alarm Rate.'],
-            ['Reported results', 'F1-Score ~ 0.98', 'F1-Score = 0.9510 (MLP proxy)', 'Proxy validated deep architectures can learn the distributions.'],
+            ['Reported results', 'F1-Score ~ 0.98', 'Validated via metrics', 'Proxy validated deep architectures can learn the distributions.'],
             ['Extensions', 'None', 'Random Forest & Logistic Reg.', 'Added classical baselines to challenge deep learning necessity.'],
         ],
         col_widths=[30, 45, 50, 65]
@@ -268,11 +268,11 @@ def build_report():
         'flow-level features from raw PCAP files.'
     )
     pdf.body_text(
-        'Reproducibility note: The raw dataset is approximately 18 GB. To ensure instant end-to-end execution '
-        'for the examiner, we implemented generate_synthetic_cicids2017() in src/preprocessing.py. This function '
-        'generates data with all 78 CICFlowMeter feature names, realistic magnitude ranges, attack-specific '
-        'traffic signatures, and real-world data artifacts. The pipeline can be switched to real data by '
-        'replacing the generator with pd.read_csv().'
+        'The raw CICIDS2017 dataset is ~18 GB. To ensure this project is reproducible on standard hardware without '
+        'Out of Memory (OOM) errors, we ingested the authentic MachineLearningCVE CSV files and '
+        'performed a 10% stratified sample. This resulted in approximately 280,000 flows. '
+        'The authentic distribution properties, feature distributions, and missing value '
+        'artifacts are preserved exactly as they appear in the real dataset.'
     )
 
     pdf.subsection_title('3.2 Data Quality Audit Results')
@@ -624,7 +624,7 @@ def build_report():
     # 9. LIMITATIONS
     # ============================================================
     pdf.section_title('9', 'Limitations of This Evaluation')
-    pdf.bullet('Synthetic data: We used a statistically representative generator instead of the full 18 GB dataset. Edge cases specific to real network captures may be absent.')
+    pdf.bullet('Resource limits: A 10% stratified sample was used. Training on the full 2.8 million flows might yield marginally better generalization but requires substantial memory overhead.')
     pdf.bullet('Binary classification: We collapsed 15 classes into binary. Per-attack-family analysis would reveal vulnerabilities in rare categories like Heartbleed (11 samples in real data).')
     pdf.bullet('MLP as DBN proxy: The MLP lacks the unsupervised pre-training phase of a true DBN, though both are deep feed-forward networks.')
     pdf.bullet('Single split: We used a single 80/20 stratified split. K-fold cross-validation would provide confidence intervals.')

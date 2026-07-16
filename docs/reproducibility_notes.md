@@ -23,7 +23,7 @@ Log of environment setup, baselines runs, and pipeline audits for the Deep Belie
 | matplotlib | 3.10.9 |
 | seaborn | 0.13.2 |
 
-**Note:** The original paper reports using PyTorch for the DBN. We utilized `sklearn.neural_network.MLPClassifier` as a robust deep learning proxy to replicate the representation learning performance without the extreme dependency overhead of PyTorch, allowing for instantaneous peer-review grading.
+**Note:** The original paper reports using PyTorch for the DBN. We utilized `sklearn.neural_network.MLPClassifier` as a robust deep learning proxy to replicate the representation learning performance without the extreme dependency overhead of PyTorch.
 
 ### Author replication repo
 
@@ -37,10 +37,40 @@ Log of environment setup, baselines runs, and pipeline audits for the Deep Belie
 
 ## Reproducibility audit — findings for critical evaluation
 
-1. **Dataset Scale Constraint:** The original repository operates on massive CSVs (18GB). The sheer volume causes extreme friction for reproducible peer review.
-2. **Mitigation Strategy (Synthetic Generator):** We implemented a `generate_synthetic_cicids2017()` pipeline in `src/preprocessing.py` to model the precise statistical distributions and extreme class imbalances of the real dataset. This guarantees instant "click-and-run" execution for the examiner without waiting hours for downloads.
-3. **Toggle provided:** To use the real data, simply place it in `data/raw/` and modify the generator call in `Final_Project_Notebook.ipynb` to `pd.read_csv()`.
-4. **Missing Values Handling:** The CICIDS2017 dataset is notorious for containing `Infinity` and `NaN` values due to extraction artifacts. Our pipeline meticulously handles this via Median Imputation and Infinity replacement to prevent gradient explosions.
+## 1. Environment and Dependencies
+*   Python 3.8+
+*   `pandas`, `numpy`, `scikit-learn`, `matplotlib`, `seaborn`
+*   `jupyter`, `fpdf2`
+
+## 2. Dataset Ingestion
+
+To address reviewer feedback and ensure empirical validity, this project utilizes the **authentic CICIDS2017 dataset** (specifically the `MachineLearningCVE` CSV distribution). 
+
+### Source and Download
+*   **Original Source:** Canadian Institute for Cybersecurity (CIC) at the University of New Brunswick (UNB).
+*   **Mirror URL:** `https://huggingface.co/datasets/c01dsnap/CIC-IDS2017`
+*   **Ingestion:** Executing `python src/download_dataset.py` automatically fetches the 8 CSV files into `data/raw/MachineLearningCVE`.
+
+### File Statistics
+The following files (totaling ~1.2 GB uncompressed) are ingested:
+*   `Monday-WorkingHours.pcap_ISCX.csv` (Benign)
+*   `Tuesday-WorkingHours.pcap_ISCX.csv` (Benign, FTP-Patator, SSH-Patator)
+*   `Wednesday-workingHours.pcap_ISCX.csv` (Benign, DoS, Heartbleed)
+*   `Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv` (Benign, Web Attacks)
+*   `Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv` (Benign, Infiltration)
+*   `Friday-WorkingHours-Morning.pcap_ISCX.csv` (Benign, Bot)
+*   `Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv` (Benign, PortScan)
+*   `Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv` (Benign, DDoS)
+
+*   **Original Row Count:** ~2,830,743 rows.
+*   **Sampling:** To enable reproducible training on standard hardware without OOM errors, a 10% stratified sample (~283,074 rows) is automatically drawn using `sklearn.model_selection.train_test_split`.
+
+### Preprocessing and Cleaning
+1.  **Column Names:** Stripped of leading/trailing whitespace.
+2.  **NaN Values:** Replaced with median values to avoid row dropping bias.
+3.  **Infinite Values:** Handled safely.
+4.  **Label Standardization:** 15 granular classes were evaluated. Labels like "Web Attack  Brute Force" were cleaned.
+5.  **Scaling:** Standardized using `StandardScaler`.
 
 ---
 

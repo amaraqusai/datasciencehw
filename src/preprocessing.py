@@ -43,97 +43,54 @@ ATTACK_TYPES = ['BENIGN', 'DoS Hulk', 'PortScan', 'DDoS',
                 'Infiltration', 'Web Attack - Sql Injection', 'Heartbleed']
 
 
-def generate_synthetic_cicids2017(n_samples=20000, random_state=42):
-    """Generate a statistically representative synthetic CICIDS2017 dataset.
-    
-    Models the key statistical properties of the real CICIDS2017 dataset:
-    - 78 CICFlowMeter features with realistic magnitude ranges
-    - Extreme class imbalance (80% benign, 20% attack across 15 classes)
-    - Data artifacts: NaN values, Infinity values, constant features, duplicate columns
-    - Attack-specific traffic signatures (DoS = high volume, Infiltration = low-and-slow)
+import glob
+import os
+
+def load_real_cicids2017(data_dir=None, sample_frac=0.10, random_state=42):
     """
-    np.random.seed(random_state)
-    n_features = len(CICIDS_FEATURES)
-
-    # --- Benign traffic: moderate volume, regular patterns ---
-    n_benign = int(n_samples * 0.80)
-    benign_means = np.random.uniform(10, 500, size=n_features)
-    benign_stds = benign_means * 0.3
-    benign_data = np.abs(np.random.normal(loc=benign_means, scale=benign_stds, size=(n_benign, n_features)))
-    benign_labels = ['BENIGN'] * n_benign
-
-    # --- Attack traffic: different distributions per attack type ---
-    attack_categories = ATTACK_TYPES[1:]  # exclude BENIGN
-    n_attack = n_samples - n_benign
-    samples_per_attack = max(1, n_attack // len(attack_categories))
-
-    attack_data_list = []
-    attack_labels_list = []
-
-    for i, attack_name in enumerate(attack_categories):
-        n_this = samples_per_attack if i < len(attack_categories) - 1 else n_attack - samples_per_attack * (len(attack_categories) - 1)
-        if n_this <= 0:
-            n_this = 1
-
-        # Each attack type has a distinct statistical signature
-        attack_means = np.random.uniform(100, 5000, size=n_features)
-        # DoS attacks: very high flow duration and packet counts
-        if 'DoS' in attack_name or 'DDoS' in attack_name:
-            attack_means[0] = 50000   # Flow Duration
-            attack_means[1] = 500     # Total Fwd Packets
-            attack_means[13] = 100000 # Flow Bytes/s
-        # PortScan: many short connections
-        elif 'PortScan' in attack_name:
-            attack_means[0] = 10      # Very short flows
-            attack_means[1] = 1       # Single packet
-            attack_means[36] = 1000   # High packets/s
-        # Infiltration/Heartbleed: low-and-slow, mimics benign
-        elif attack_name in ['Infiltration', 'Heartbleed']:
-            attack_means = benign_means * np.random.uniform(0.8, 1.2, size=n_features)
-
-        attack_stds = attack_means * 0.4
-        data = np.abs(np.random.normal(loc=attack_means, scale=attack_stds, size=(n_this, n_features)))
-        attack_data_list.append(data)
-        attack_labels_list.extend([attack_name] * n_this)
-
-    attack_data = np.vstack(attack_data_list)
-    X = np.vstack([benign_data, attack_data])
-    labels = benign_labels + attack_labels_list
-
-    # --- Inject realistic data artifacts ---
-    # 1. NaN values (~1.5% of cells in Flow Bytes/s and Flow Packets/s)
-    nan_idx = np.random.choice(len(X), size=int(0.015 * len(X)), replace=False)
-    X[nan_idx, 13] = np.nan  # Flow Bytes/s
-    nan_idx2 = np.random.choice(len(X), size=int(0.01 * len(X)), replace=False)
-    X[nan_idx2, 14] = np.nan  # Flow Packets/s
-
-    # 2. Infinity values (~0.5% in Flow Bytes/s due to zero-duration division)
-    inf_idx = np.random.choice(len(X), size=int(0.005 * len(X)), replace=False)
-    X[inf_idx, 13] = np.inf
-
-    # 3. Constant features (Bwd PSH Flags, Fwd URG Flags, Bwd URG Flags = always 0)
-    X[:, 30] = 0  # Bwd PSH Flags
-    X[:, 31] = 0  # Fwd URG Flags
-    X[:, 32] = 0  # Bwd URG Flags
-
-    # 4. Near-constant features
-    X[:, 54] = 0  # Fwd Avg Bytes/Bulk
-    X[:, 55] = 0  # Fwd Avg Packets/Bulk
-    X[:, 56] = 0  # Fwd Avg Bulk Rate
-    X[:, 57] = 0  # Bwd Avg Bytes/Bulk
-    X[:, 58] = 0  # Bwd Avg Packets/Bulk
-    X[:, 59] = 0  # Bwd Avg Bulk Rate
-
-    # 5. Duplicate column (Subflow Fwd Packets == Total Fwd Packets)
-    X[:, 60] = X[:, 1]  # Subflow Fwd Packets = Total Fwd Packets
-    X[:, 62] = X[:, 2]  # Subflow Bwd Packets = Total Backward Packets
-
-    # Build DataFrame
-    df = pd.DataFrame(X, columns=CICIDS_FEATURES)
-    df['Label'] = labels
-
-    # Shuffle
-    df = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    Load the authentic CICIDS2017 dataset from CSV files.
+    """
+    if data_dir is None:
+        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'MachineLearningCVE')
+        
+    csv_files = glob.glob(os.path.join(data_dir, '*.csv'))
+    if not csv_files:
+        raise FileNotFoundError(f"No CSV files found in {data_dir}. Please run src/download_dataset.py first.")
+    
+    df_list = []
+    for f in csv_files:
+        print(f"Loading {os.path.basename(f)}...")
+        # Handle mixed types or bad lines if any
+        df_part = pd.read_csv(f, skipinitialspace=True, encoding='utf-8', low_memory=False)
+        # Strip whitespace from column names
+        df_part.columns = [c.strip() for c in df_part.columns]
+        df_list.append(df_part)
+        
+    df = pd.concat(df_list, ignore_index=True)
+    
+    # Strip whitespace from labels just in case
+    if 'Label' in df.columns:
+        df['Label'] = df['Label'].astype(str).str.strip()
+        # Fix known labeling typos in CICIDS2017 (e.g. Web Attack  Brute Force)
+        df['Label'] = df['Label'].replace({
+            'Web Attack  Brute Force': 'Web Attack - Brute Force',
+            'Web Attack  XSS': 'Web Attack - XSS',
+            'Web Attack  Sql Injection': 'Web Attack - Sql Injection'
+        })
+        
+    # Sample to reduce memory footprint
+    if sample_frac < 1.0:
+        print(f"Sampling {sample_frac*100}% of {len(df)} rows stratified by Label...")
+        from sklearn.model_selection import train_test_split
+        # Identify classes with extremely few samples to avoid ValueError in train_test_split
+        counts = df['Label'].value_counts()
+        valid_classes = counts[counts > 5].index
+        df_filtered = df[df['Label'].isin(valid_classes)]
+        
+        _, sampled_df = train_test_split(df_filtered, test_size=sample_frac, 
+                                         stratify=df_filtered['Label'], random_state=random_state)
+        df = sampled_df.reset_index(drop=True)
+        
     return df
 
 
