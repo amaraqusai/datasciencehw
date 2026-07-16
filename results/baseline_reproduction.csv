@@ -1,2 +1,2 @@
-Model,Accuracy,Precision,Recall,F1-Score,MCC,ROC-AUC,PR-AUC
-DBN Baseline,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Model,Accuracy,Precision,Recall,F1-Score,F2-Score,MCC,ROC-AUC,PR-AUC,TP,TN,FP,FN,FAR,FNR
+DBN Baseline (via MLP proxy),0.981,0.981383,0.9225,0.951031,0.933704,0.93995,0.991236,0.981849,738,3186,14,62,0.004375,0.0775
